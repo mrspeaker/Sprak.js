@@ -4,24 +4,36 @@ const Env = require('./env');
 
 const env = Env();
 
-const p = `
-# Welcome to Sprak, yo!
+const p = `# Welcome to Sprak, yo!
 var a = 1.5
 var b = Random()
 var c = 2
 
 # Print it out!
+ClearText()
 Print("Welcome to Sprak.")
 Print((a + b) * c)
+
+# Lol things
+void Lol()
+  # oh, lol
+  Print("lololol.")
+end
 `;
 
-const parsed = p.split('\n')
-  .filter(l => l.trim() !== "") // Remove empty lines
-  .map(l => parse(l)); // Parse each line
+const parsed = parse(p.split('\n')
+//  .filter(l => l.trim() !== "") // Remove empty lines
+  .join('\n'));
+  //.map(l => parse(l)); // Parse each line
 
-evals.evalProg(parsed, env);
+try {
+  evals.evalStatements(parsed, env);
+} catch (e) {
+  console.log("err:", e);
+}
 
-document.body.innerHTML = `<pre>--PROGRAM--${p}
+document.body.innerHTML = `<pre>--PROGRAM--
+${p}
 
 
 --DISPLAY--

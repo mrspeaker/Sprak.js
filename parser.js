@@ -4,6 +4,7 @@ const peg = `
     = ws seq:statements { return seq; }
 
   char = [ a-zA-Z0-9\\?\\!]
+  moreChar = [ a-zA-Z0-9!#$%&\'\(\)*+,-\./]
 
   number_frac
     = '.' chars:[0-9]* { return '.' + chars.join(''); }
@@ -15,45 +16,46 @@ const peg = `
       { return -parseFloat(chars.join('') + frac); }
 
   string
-    = '\\"' ch:[ a-zA-Z0-9!#$%&\'\(\)*+,-\./]* '\\"' { return ch.join(''); }
+    = '\\"' ch:moreChar* '\\"' { return ch.join(''); }
 
-  comment = init:'#' rest:.* { return init + rest.join(''); }
+  comment = '#' rest:moreChar* { return rest.join(''); }
 
-  keyword = 'then'
+  type = "string" / "number" / "void"
 
+  keywords = "end"
   validfirstchar = [a-zA-Z_]
   validchar = [0-9a-zA-Z_]
   identifier =
-    !keyword f:validfirstchar chars:validchar* { return f + chars.join(''); }
+    f:validfirstchar chars:validchar* { return f + chars.join(''); }
+
+  nonEndStatement = !end s:statement { return s }
 
   statement
-    = c:comment { return { tag: "comment", val: c} }
-    / "if" sigws expr:expression sigws
-      "then" ws goto:number
-      { return { tag:"ifgoto", expr:expr, line:goto }; }
-    / "if" sigws expr:expression sigws
-      "then" ws body:statements ws "endif" ws
-      { return { tag:"if", expr:expr, body:body }; }
-    / "def " ws v:identifier ws "(" ws ")" ws
-      "{" ws body:statements ws "}" ws
+    = c:comment ws br { return { tag: "comment", val: c} }
+    / "var" ws v:identifier ws "=" ws expr:expression ws br
+      { return { tag:"=", left:v, right:expr }; }
+    / t:type ws v:identifier ws "(" ws ")" br ws body:statements ws end
+        { return { tag:"func", val:v, body:body }; }
+    / "def " ws v:identifier ws "(" ws ")" ws "{" ws body:statements ws "}" ws
       { return { tag:"def", name:v, args:[], body:body }; }
     / "def " ws v:identifier ws "(" ws args:ident_list ws ")"
       ws "{" ws body:statements ws "}" ws
       { return { tag:"def", name:v, args:args, body:body }; }
+    / "if" sigws expr:expression sigws ws body:statements ws "end" ws
+      { return { tag:"if", expr:expr, body:body }; }
     / "repeat" ws "(" ws expr:expression ws ")" ws
       "{" ws body:statements ws "}" ws
       { return { tag:"repeat", expr:expr, body:body }; }
-    / "var" ws v:identifier ws "=" ws expr:expression ws
-      { return { tag:"=", left:v, right:expr }; }
-    / expr:expression ws
+    / expr:expression ws br
       { return { tag:"ignore", body:expr }; }
 
-  sep = ':'
+  sep = ';'
+  end = 'end' ws br
 
   statements
-     = ws s:statement sep ss:statements* ws
+     = ws s:nonEndStatement ss:statements* ws
      { return ss.reduce((ac, el) => { el.forEach(e => ac.push(e)); return ac; }, [s]); }
-     / ws s:statement { return [s]; }
+     / ws s:nonEndStatement { return [s]; }
 
   expression
     = expr:comparative { return expr; }
@@ -79,22 +81,16 @@ const peg = `
   primary
     = number
     / string
-    / v:identifier "(" ws ")"
-      { return { tag:"call", name:v, args:[] }; }
-    / v:identifier ws "(" ws args:arglist ws ")"
-        { return { tag:"call", _:"callExprA", name:v, args:args }; }
-    / v:identifier ws args:arglist
-      { return { tag:"call", _:"callExprB", name:v, args:args }; }
-    / v:identifier
-      { return { tag:"ident", name:v }; }
-    / "(" ws expression:expression ws ")"
-      { return expression; }
+    / v:identifier "(" ws ")" { return { tag:"call", name:v, args:[] }; }
+    / v:identifier ws "(" ws args:arglist ws ")" { return { tag:"call", _:"a", name:v, args:args }; }
+    / v:identifier ws args:arglist { return { tag:"call", _:"b", name:v, args:args }; }
+    / v:identifier { return { tag:"ident", name:v }; }
+    / "(" ws expression:expression ws ")" { return expression; }
 
   comma_expression = "," ws expr:expression { return expr; }
 
   arglist
-    = first:expression rest:comma_expression*
-      { return [first].concat(rest); }
+    = first:expression rest:comma_expression* { return [first].concat(rest); }
 
   comma_identifier = "," ws v:identifier { return v; }
 
@@ -102,8 +98,9 @@ const peg = `
       = first:identifier rest:comma_identifier*
         { return [first].concat(rest); }
 
-  ws = [ \\t\\r\\n]*
-  sigws = [ \\t\\r\\n]+
+  ws = [ \\t]*
+  sigws = [ \\t]+
+  br = [\\r\\n]+
 
 `;
 const parser = PEG.buildParser(peg);
