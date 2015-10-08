@@ -4,24 +4,28 @@
     <meta charset="utf-8">
     <title>test</title>
     <style media="screen">
-      #prog {
+      #entry {
         float: left;
         margin: 13px;
       }
       #screen {
         width: 320px;
         height: 240px;
-        background: #000;
-        color: #0f0;
+        /*background: #000;
+        color: #0f0;*/
         float: left;
       }
-      #out {
+      #out, #run {
         clear:both;
       }
     </style>
   </head>
   <body>
-    <textarea id="prog" cols="30" rows="16"></textarea>
+    <div id="entry">
+      <textarea id="prog" cols="40" rows="16"></textarea>
+      <br/>
+      <button id="run">run</button>
+    </div>
     <pre id="screen"></pre>
     <pre id="out"></pre>
     <script src="./index.js" charset="utf-8"></script>

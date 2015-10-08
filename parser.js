@@ -97,7 +97,7 @@ const peg = `
 
   ws = [ \\t]*
   sigws = [ \\t]+
-  br = [\\r\\n]+
+  br = [\\r\\n]+ / !.
 
 `;
 const parser = PEG.buildParser(peg);
