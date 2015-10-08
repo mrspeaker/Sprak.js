@@ -27,21 +27,17 @@ end
 
 progDom.value = p;
 
-const parsed = parse(p.split('\n')
-//  .filter(l => l.trim() !== "") // Remove empty lines
-  .join('\n'));
-  //.map(l => parse(l)); // Parse each line
-
+const parsed = parse(p);
 const functions = parsed.filter(a => a.tag === "define");
 const theRest = parsed.filter(a => a.tag !== "define");
-console.log(functions, theRest);
+
 try {
   evals.evalStatements([...functions, ...theRest], env);
 } catch (e) {
   console.log("err:", e);
 }
-document.querySelector("#screen").innerHTML = env.output.join("\n");
 
+document.querySelector("#screen").innerHTML = env.output.join("\n");
 document.querySelector("#out").innerHTML = `--AST--
 
 ${JSON.stringify(parsed, null, 2)}`;
