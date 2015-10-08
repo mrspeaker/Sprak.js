@@ -80,8 +80,9 @@ const evalStatement = (stmt, env) => {
   case 'ignore':
     return evalExpr(stmt.body, env);
 
-  case 'repeat':
+  case 'loop':
     const count = evalExpr(stmt.expr, env);
+    // Hmm... shouldn't execute entire loop at once.
     var lastValue = 0;
     for (var i = 0; i < count; ++i) {
       lastValue = evalStatements(stmt.body, env);
@@ -117,7 +118,7 @@ const evalStatement = (stmt, env) => {
     return 0;
 
   case 'comment':
-    // TODO: remove from input.
+    // TODO: remove from input?
     return null;
 
   default:
