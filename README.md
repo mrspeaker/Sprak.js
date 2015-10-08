@@ -5,8 +5,8 @@ by @mrspeaker
 'tis just the verrrry beginning.
 
 * assignment
-* functions
-* Math/precedence
+* functions w/args
+* Some math/precedence
 * Print/ClearText()
 
 > What's this about? See http://www.elseheartbreak.com
