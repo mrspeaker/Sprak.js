@@ -36,11 +36,8 @@ const peg = `
       { return { tag:"=", left:v, right:expr }; }
     / t:type ws v:identifier ws "(" ws ")" br ws body:statements ws end
         { return { tag:"define", name:v, args: [], body:body }; }
-    / "def " ws v:identifier ws "(" ws ")" ws "{" ws body:statements ws "}" ws
-      { return { tag:"def", name:v, args:[], body:body }; }
-    / "def " ws v:identifier ws "(" ws args:ident_list ws ")"
-      ws "{" ws body:statements ws "}" ws
-      { return { tag:"def", name:v, args:args, body:body }; }
+    / t:type ws v:identifier ws "(" ws args:ident_list ws ")" br ws body:statements ws end
+        { return { tag:"define", name:v, args: args, body:body }; }
     / "if" sigws expr:expression sigws ws body:statements ws "end" ws
       { return { tag:"if", expr:expr, body:body }; }
     / "repeat" ws "(" ws expr:expression ws ")" ws
