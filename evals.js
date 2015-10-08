@@ -120,6 +120,23 @@ const evalStatement = (stmt, env) => {
     // TODO: remove from input.
     return null;
 
+  case 'define':
+    // name args body
+    var new_func = function() {
+      // This function takes any number of arguments
+      let i;
+      let new_env;
+      const new_bindings = {};
+      for(i = 0; i < stmt.args.length; i++) {
+        new_bindings[stmt.args[i]] = arguments[i];
+      }
+      new_env = { bindings: new_bindings, outer: env };
+      return evalStatements(stmt.body, new_env);
+    };
+    console.log("hey!", stmt.name)
+    add_binding(env, stmt.name, new_func);
+    return 0;
+
   default:
     console.log('syntax error? unknown statement:', stmt.tag);
   }

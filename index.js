@@ -4,6 +4,8 @@ const Env = require('./env');
 
 const env = Env();
 
+const progDom = document.querySelector('#prog');
+
 const p = `# Welcome to Sprak, yo!
 var a = 1.5
 var b = Random()
@@ -12,34 +14,34 @@ var c = 2
 # Print it out!
 ClearText()
 Print("Welcome to Sprak.")
+Bar()
+Print("Some math:")
 Print((a + b) * c)
+Bar()
 
-# Lol things
-void Lol()
-  # oh, lol
-  Print("lololol.")
+void Bar()
+  Print("==============")
 end
+
 `;
+
+progDom.value = p;
 
 const parsed = parse(p.split('\n')
 //  .filter(l => l.trim() !== "") // Remove empty lines
   .join('\n'));
   //.map(l => parse(l)); // Parse each line
 
+const functions = parsed.filter(a => a.tag === "define");
+const theRest = parsed.filter(a => a.tag !== "define");
+console.log(functions, theRest);
 try {
-  evals.evalStatements(parsed, env);
+  evals.evalStatements([...functions, ...theRest], env);
 } catch (e) {
   console.log("err:", e);
 }
+document.querySelector("#screen").innerHTML = env.output.join("\n");
 
-document.body.innerHTML = `<pre>--PROGRAM--
-${p}
+document.querySelector("#out").innerHTML = `--AST--
 
-
---DISPLAY--
-${env.output.join("\n")}
-
-
---AST--
-
-${JSON.stringify(parsed, null, 2)}</pre>`;
+${JSON.stringify(parsed, null, 2)}`;

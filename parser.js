@@ -4,7 +4,7 @@ const peg = `
     = ws seq:statements { return seq; }
 
   char = [ a-zA-Z0-9\\?\\!]
-  moreChar = [ a-zA-Z0-9!#$%&\'\(\)*+,-\./]
+  moreChar = [ a-zA-Z0-9!#$%&\'\(\)*+,-\.=:/]
 
   number_frac
     = '.' chars:[0-9]* { return '.' + chars.join(''); }
@@ -35,7 +35,7 @@ const peg = `
     / "var" ws v:identifier ws "=" ws expr:expression ws br
       { return { tag:"=", left:v, right:expr }; }
     / t:type ws v:identifier ws "(" ws ")" br ws body:statements ws end
-        { return { tag:"func", val:v, body:body }; }
+        { return { tag:"define", name:v, args: [], body:body }; }
     / "def " ws v:identifier ws "(" ws ")" ws "{" ws body:statements ws "}" ws
       { return { tag:"def", name:v, args:[], body:body }; }
     / "def " ws v:identifier ws "(" ws args:ident_list ws ")"
