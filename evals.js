@@ -103,7 +103,7 @@ const evalStatement = (stmt, env) => {
     }
     return val;
 
-  case 'def':
+  case 'define':
     const func = function() {
       const bindings = stmt.args.reduce((b, arg, i) => {
         b[arg] = arguments[i];
@@ -119,23 +119,6 @@ const evalStatement = (stmt, env) => {
   case 'comment':
     // TODO: remove from input.
     return null;
-
-  case 'define':
-    // name args body
-    var new_func = function() {
-      // This function takes any number of arguments
-      let i;
-      let new_env;
-      const new_bindings = {};
-      for(i = 0; i < stmt.args.length; i++) {
-        new_bindings[stmt.args[i]] = arguments[i];
-      }
-      new_env = { bindings: new_bindings, outer: env };
-      return evalStatements(stmt.body, new_env);
-    };
-    console.log("hey!", stmt.name)
-    add_binding(env, stmt.name, new_func);
-    return 0;
 
   default:
     console.log('syntax error? unknown statement:', stmt.tag);
