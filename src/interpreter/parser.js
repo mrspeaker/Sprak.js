@@ -79,8 +79,7 @@ const peg = `
     = number
     / string
     / v:identifier "(" ws ")" { return { tag:"call", name:v, args:[] }; }
-    / v:identifier ws "(" ws args:arglist ws ")" { return { tag:"call", _:"a", name:v, args:args }; }
-    / v:identifier ws args:arglist { return { tag:"call", _:"b", name:v, args:args }; }
+    / v:identifier ws "(" ws args:arglist ws ")" { return { tag:"call", name:v, args:args }; }
     / v:identifier { return { tag:"ident", name:v }; }
     / "(" ws expression:expression ws ")" { return expression; }
 

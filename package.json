@@ -4,7 +4,8 @@
   "description": "Sprak.js: a Sprak interpreter",
   "main": "index.js",
   "scripts": {
-    "start": "budo src/index.js -- -t babelify | garnish"
+    "start": "budo src/index.js -- -t babelify | garnish",
+    "test": "node ./tests/parser.js"
   },
   "author": "Mr Speaker",
   "license": "GPL3",
