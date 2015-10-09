@@ -23,3 +23,7 @@ by @mrspeaker
   * loop c in message - end
 * if/multiple else
 * and/or
+
+## Fix
+
+* can't have empty if/end

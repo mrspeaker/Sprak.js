@@ -18,6 +18,12 @@ function deep (msg, val, expected) {
 }
 
 deep(
+  "Comment",
+  parse(`# Hello, World`),
+  [{"tag":"comment","val":" Hello, World"}]
+);
+
+deep(
   "Simple value",
   parse(`"hi"`),
   [ { tag: 'ignore', body: "hi" } ]);
@@ -34,8 +40,37 @@ deep(
   [{"tag":"ignore","body":{"tag":"call","name":"ClearText","args":[]}}]);
 
 deep(
-    "Function call, one arg",
-    parse(`Print("hey")`),
-    [{"tag":"ignore","body":{"tag":"call","name":"Print","args":["hey"]}}]);
+  "Function call, one arg",
+  parse(`Print("hey")`),
+  [{"tag":"ignore","body":{"tag":"call","name":"Print","args":["hey"]}}]);
 
-// deep()
+deep(
+  "Function call, multiple args",
+  parse(`SaveMemory("life", 42)`),
+  [{"tag":"ignore","body":{"tag":"call","name":"SaveMemory","args":["life",42]}}]
+);
+
+// Should work:
+/*
+  deep() if a == 1 \n end... same line?
+*/
+
+deep(
+  "if statement, simple",
+  parse(
+`if a == 1
+  # test
+end`),
+  [{"tag":"if","expr":{"tag":"call","name":"==","args":[{"tag":"ident","name":"a"},1]},"body":[{"tag":"comment","val":" test"}]}]
+);
+
+deep(
+  "if/else",
+  parse(
+`if a == 1
+  # test
+else
+  # test
+end`),
+  [{"tag":"ifelse","expr":{"tag":"call","name":"==","args":[{"tag":"ident","name":"a"},1]},"body":[{"tag":"comment","val":" test"}],"body2":[{"tag":"comment","val":" test"}]}]
+);
