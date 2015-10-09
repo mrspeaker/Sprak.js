@@ -1,24 +1,13 @@
 "use strict";
-const assert = require("assert");
 const parse = require("../src/interpreter/parser");
+const tester = require("./tester");
+const deep = tester.deep;
 
-function deep (msg, val, expected) {
-  let passed = false;
-  try {
-    assert.deepEqual(val, expected, msg);
-    passed = true;
-  } catch (e) {
-    console.log("😡  FAIL");
-    console.log(e);
-    console.log(JSON.stringify(e.actual));
-  }
-  if (passed) {
-    console.log("😀  " + msg);
-  }
-}
+console.log("🌴  🌴  🌴  Parser 🌴  🌴  🌴");
+console.log("");
 
 deep(
-  "Comment",
+  "Comment. # Hello, World.",
   parse(`# Hello, World`),
   [{"tag":"comment","val":" Hello, World"}]
 );
@@ -26,7 +15,13 @@ deep(
 deep(
   "Simple value",
   parse(`"hi"`),
-  [ { tag: 'ignore', body: "hi" } ]);
+  [ { tag: 'expr', body: "hi" } ]);
+
+deep(
+  "Compound expression. (2 + 2) * 2.",
+  parse(`(2 + 2) * 2`),
+  [{"tag":"expr","body":{"tag":"call","name":"*","args":[{"tag":"call","name":"+","args":[2,2]},2]}}]);
+
 
 deep(
   "Assignment to variable",
@@ -37,17 +32,17 @@ deep(
 deep(
   "Function call, no args",
   parse(`ClearText()`),
-  [{"tag":"ignore","body":{"tag":"call","name":"ClearText","args":[]}}]);
+  [{"tag":"expr","body":{"tag":"call","name":"ClearText","args":[]}}]);
 
 deep(
   "Function call, one arg",
   parse(`Print("hey")`),
-  [{"tag":"ignore","body":{"tag":"call","name":"Print","args":["hey"]}}]);
+  [{"tag":"expr","body":{"tag":"call","name":"Print","args":["hey"]}}]);
 
 deep(
   "Function call, multiple args",
   parse(`SaveMemory("life", 42)`),
-  [{"tag":"ignore","body":{"tag":"call","name":"SaveMemory","args":["life",42]}}]
+  [{"tag":"expr","body":{"tag":"call","name":"SaveMemory","args":["life",42]}}]
 );
 
 // Should work:
@@ -74,3 +69,24 @@ else
 end`),
   [{"tag":"ifelse","expr":{"tag":"call","name":"==","args":[{"tag":"ident","name":"a"},1]},"body":[{"tag":"comment","val":" test"}],"body2":[{"tag":"comment","val":" test"}]}]
 );
+
+deep(
+  "function definition",
+  parse(
+`void Say()
+  # test
+end`),
+  [{"tag":"define","name":"Say","args":[],"body":[{"tag":"comment","val":" test"}]}]
+);
+
+deep(
+  "loop i from 0 to 10",
+  parse(
+`loop i from 0 to 10
+  Print(i)
+end
+`),
+  [{"tag":"loop","ident":"i","body":[{"tag":"expr","body":{"tag":"call","name":"Print","args":[{"tag":"ident","name":"i"}]}}],"from":0,"to":10}]
+);
+
+console.log("");

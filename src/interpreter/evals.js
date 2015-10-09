@@ -50,7 +50,6 @@ const evalExpr = (expr, env) => {
   if (typeof expr === "number" || typeof expr === "string") {
     return expr;
   }
-
   switch(expr.tag) {
   case "call":
     const func = lookup(env, expr.name);
@@ -77,14 +76,15 @@ const evalStatement = (stmt, env) => {
   // Special forms
   switch(stmt.tag) {
 
-  case "ignore":
+  case "expr":
     return evalExpr(stmt.body, env);
 
   case "loop":
-    const count = evalExpr(stmt.expr, env);
     // Hmm... shouldn't execute entire loop at once.
+    add_binding(env, stmt.ident, 0);
     var lastValue = 0;
-    for (var i = 0; i < count; ++i) {
+    for (var i = stmt.from; i < stmt.to; ++i) {
+      update(env, stmt.ident, i);
       lastValue = evalStatements(stmt.body, env);
     }
     return lastValue;

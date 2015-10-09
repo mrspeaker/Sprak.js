@@ -6,6 +6,26 @@ by @mrspeaker
 
 'tis just the verrrry beginning.
 
+## Running
+
+Installing (requires NPM):
+
+```js
+  npm install
+```
+
+Runninging (served on port 9966):
+
+```js
+  npm start
+```
+
+Run the unit tests:
+
+```js
+  npm test
+```
+
 ## Working-ish
 
 * assignment
@@ -14,12 +34,12 @@ by @mrspeaker
 * math/precedence
 * Print/ClearText()
 * Load/SaveMemory
+* loop i from 0 to 10 - end
 
 ## Next
 
 * loops:
   * loop - end
-  * loop i from 0 to 19 - end
   * loop c in message - end
 * if/multiple else
 * and/or

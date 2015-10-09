@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "budo src/index.js -- -t babelify | garnish",
-    "test": "node ./tests/parser.js"
+    "test": "node ./tests/index.js"
   },
   "author": "Mr Speaker",
   "license": "GPL3",
