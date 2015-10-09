@@ -80,8 +80,10 @@ const evalStatement = (stmt, env) => {
     return evalExpr(stmt.body, env);
 
   case "loop":
-    // Hmm... shouldn't execute entire loop at once.
-    add_binding(env, stmt.ident, 0);
+    // Todo: change to single-step model. Shouldn't execute entire loop at once.
+    if (!exists(env, stmt.ident)) {
+      add_binding(env, stmt.ident, 0);
+    }
     var lastValue = 0;
     for (var i = stmt.from; i < stmt.to; ++i) {
       update(env, stmt.ident, i);

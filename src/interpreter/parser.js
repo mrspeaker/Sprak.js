@@ -44,10 +44,10 @@ const peg = `
       { return { tag:"if", expr:ex, body:body }; }
 
     / "loop" sigws v:identifier sigws
-      "from" sigws from:number sigws
-      "to" sigws to:number ws br
-      body:statements end
-      { return { tag:"loop", ident:v, body:body, from:from, to:to }; }
+        "from" sigws from:number sigws
+        "to" sigws to:number ws br
+        body:statements end
+        { return { tag:"loop", ident:v, body:body, from:from, to:to }; }
 
     / ex:expression ws br { return { tag:"expr", body:ex }; }
 
