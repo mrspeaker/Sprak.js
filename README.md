@@ -2,11 +2,24 @@
 
 by @mrspeaker
 
+> What's this about? See http://www.elseheartbreak.com
+
 'tis just the verrrry beginning.
 
-* assignment
-* functions w/args
-* Some math/precedence
-* Print/ClearText()
+## Working-ish
 
-> What's this about? See http://www.elseheartbreak.com
+* assignment
+* if/else/end
+* functions + args
+* math/precedence
+* Print/ClearText()
+* Load/SaveMemory
+
+## Next
+
+* loops:
+  * loop - end
+  * loop i from 0 to 19 - end
+  * loop c in message - end
+* if/multiple else
+* and/or

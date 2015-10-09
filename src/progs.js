@@ -12,6 +12,11 @@ Print("Some math:")
 Print((a + b) * c)
 Bar()
 
+# Mem
+SaveMemory("a", 10)
+var a = LoadMemory("a")
+Print(a)
+
 void Bar()
   Print("==============")
 end

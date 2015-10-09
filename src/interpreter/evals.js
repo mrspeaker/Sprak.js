@@ -1,6 +1,6 @@
 const lookup = (env, v) => {
   if (!env || !env.bindings) {
-    throw new Error('Undefined variable ' + v);
+    throw new Error("Undefined variable " + v);
   }
   if (env.bindings.hasOwnProperty(v)) {
     return env.bindings[v];
@@ -20,7 +20,7 @@ const exists = (env, v) => {
 
 const update = (env, v, val) => {
   if (!env || !env.bindings) {
-    throw new Error('Undefined variable ' + v);
+    throw new Error("Undefined variable " + v);
   }
   if (env.bindings.hasOwnProperty(v)) {
     env.bindings[v] = val;
@@ -34,7 +34,7 @@ const update = (env, v, val) => {
 const add_binding = (env, stmt, value) => {
   // redefine if already exists
   var e = env;
-  while (e.hasOwnProperty('bindings')) {
+  while (e.hasOwnProperty("bindings")) {
     if (e.bindings.hasOwnProperty(stmt)) {
       e.bindings[stmt] = value;
       return 0;
@@ -47,24 +47,24 @@ const add_binding = (env, stmt, value) => {
 
 const evalExpr = (expr, env) => {
 
-  if (typeof expr === 'number' || typeof expr === 'string') {
+  if (typeof expr === "number" || typeof expr === "string") {
     return expr;
   }
 
   switch(expr.tag) {
-  case 'call':
+  case "call":
     const func = lookup(env, expr.name);
     if (!func) {
-      throw new Exception('No such function ' + expr.name);
+      throw new Exception("No such function " + expr.name);
     }
     const args = expr.args.map(item => evalExpr(item, env));
     return func.apply(env, args);
 
-  case 'ident':
+  case "ident":
     return lookup(env, expr.name);
 
   default:
-    console.log('expr not found', expr);
+    console.log("expr not found", expr);
     //const func = lookup(env, expr.name);
 
   }
@@ -77,10 +77,10 @@ const evalStatement = (stmt, env) => {
   // Special forms
   switch(stmt.tag) {
 
-  case 'ignore':
+  case "ignore":
     return evalExpr(stmt.body, env);
 
-  case 'loop':
+  case "loop":
     const count = evalExpr(stmt.expr, env);
     // Hmm... shouldn't execute entire loop at once.
     var lastValue = 0;
@@ -89,7 +89,7 @@ const evalStatement = (stmt, env) => {
     }
     return lastValue;
 
-  case '=':
+  case "=":
     // Create var if not exists yet.
     if (!exists(env, stmt.left)) {
       add_binding(env, stmt.left, 0);
@@ -98,13 +98,22 @@ const evalStatement = (stmt, env) => {
     update(env, stmt.left, val);
     return val;
 
-  case 'if':
+  case "if":
     if (evalExpr(stmt.expr, env)) {
       val = evalStatements(stmt.body, env);
     }
     return val;
 
-  case 'define':
+  case "ifelse":
+    if (evalExpr(stmt.expr, env)) {
+      val = evalStatements(stmt.body, env);
+    } else {
+      val = evalStatements(stmt.body2, env);
+    }
+    return val;
+
+
+  case "define":
     const func = function() {
       const bindings = stmt.args.reduce((b, arg, i) => {
         b[arg] = arguments[i];
@@ -117,12 +126,12 @@ const evalStatement = (stmt, env) => {
     add_binding(env, stmt.name, func);
     return 0;
 
-  case 'comment':
+  case "comment":
     // TODO: remove from input?
     return null;
 
   default:
-    console.log('syntax error? unknown statement:', stmt.tag);
+    console.log("syntax error? unknown statement:", stmt.tag);
   }
 };
 

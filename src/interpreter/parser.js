@@ -20,7 +20,7 @@ const peg = `
 
   comment = '#' rest:moreChar* { return rest.join(''); }
 
-  type = "string" / "number" / "void"
+  dataType = "string" / "number" / "void"
 
   keywords = "end"
   validfirstchar = [a-zA-Z_]
@@ -28,25 +28,26 @@ const peg = `
   identifier =
     f:validfirstchar chars:validchar* { return f + chars.join(''); }
 
-  nonEndStatement = !end s:statement { return s }
-
   statement
     = c:comment ws br { return { tag: "comment", val: c} }
     / "var" ws v:identifier ws "=" ws expr:expression ws br
       { return { tag:"=", left:v, right:expr }; }
-    / t:type ws v:identifier ws "(" ws ")" br ws body:statements ws end
+    / t:dataType ws v:identifier ws "(" ws ")" ws br body:statements ws end
         { return { tag:"define", name:v, args: [], body:body }; }
-    / t:type ws v:identifier ws "(" ws args:ident_list ws ")" ws br ws body:statements ws end
+    / t:dataType ws v:identifier ws "(" ws args:ident_list ws ")" ws br ws body:statements ws end
         { return { tag:"define", name:v, args: args, body:body }; }
-    / "if" sigws expr:expression sigws ws body:statements ws "end" ws
+    / "if" sigws expr:expression ws br body:statements ws else body2:statements ws end
+      { return { tag:"ifelse", expr:expr, body:body, body2:body2 }; }
+    / "if" sigws expr:expression ws br body:statements ws end
       { return { tag:"if", expr:expr, body:body }; }
-    / "loop" ws "(" ws expr:expression ws ")" ws br ws body:statements ws end
-      { return { tag:"loop", expr:expr, body:body }; }
+    / "loop" ws br ws body:statements ws end
+      { return { tag:"loop", body:body }; }
     / expr:expression ws br
       { return { tag:"ignore", body:expr }; }
 
-  sep = ';'
   end = 'end' ws br
+  else = 'else' ws br
+  nonEndStatement = !else !end s:statement { return s }
 
   statements
      = ws s:nonEndStatement ss:statements* ws
@@ -68,7 +69,7 @@ const peg = `
       { return {tag:'call', name:op, args:[left, right]}; }
     / multiplicative
 
-  mult_op = "*" / "/" / "mod"
+  mult_op = "*" / "/" / "Mod"
   multiplicative
       = left:primary ws op:mult_op ws right:multiplicative
           { return {tag:'call', name:op, args:[left, right]}; }
