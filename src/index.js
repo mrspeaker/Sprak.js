@@ -8,8 +8,11 @@ domRun.addEventListener("click", () => runIt(), false);
 
 const env = Env();
 const runIt = () => {
-  run(domProgText.value, env);
-  domScreen.innerHTML = env.output.join("\n");
+  run(domProgText.value, env, domScreen);
+  setInterval(() => {
+    domScreen.innerHTML = env.output.join("\n");
+  }, 1000);
+
 };
 
 // Init program

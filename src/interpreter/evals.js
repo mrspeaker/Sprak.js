@@ -1,3 +1,4 @@
+/* @flow */
 const lookup = (env, v) => {
   if (!env || !env.bindings) {
     throw new Error("Undefined variable " + v);
@@ -45,40 +46,110 @@ const add_binding = (env, stmt, value) => {
   env.bindings[stmt] = value;
 };
 
-const evalExpr = (expr, env) => {
+const thunk = (f, ...args) => ({
+  tag: 'thunk',
+  func: f,
+  args: args
+});
 
+const thunkVal = val => ({
+  tag: 'val',
+  val
+});
+
+const stepStart = (expr, env) => ({
+  data: evalExpr(expr, env, thunkVal),
+  done: false
+});
+
+const stepOne = state => {
+  const th = state.data;
+  if (th.tag == 'val') {
+    state.data = th.val;
+    state.done = true;
+  }
+  else if (th.tag === 'thunk') {
+    if (!th.func || !th.func.apply) {
+      console.error("what", th);
+    }
+    state.data = th.func.apply(null, th.args);
+  }
+  else {
+    throw new Error('bad thunk');
+  }
+  return state;
+};
+
+// this is a trampoline...
+const evalAll = (expr, env, cb) => {
+  var state = stepStart(expr, env);
+  const evals = state => {
+    stepOne(state);
+    if (!state.done) {
+      setTimeout(() => {
+        evals(state);
+      }, 100);
+    } else {
+      cb(state.data);
+    }
+  };
+
+  evals(state);
+};
+
+const evalExpr = (expr, env, cont) => {
   if (typeof expr === "number" || typeof expr === "string") {
-    return expr;
+    return thunk(cont, expr);
   }
   switch(expr.tag) {
+
   case "call":
     const func = lookup(env, expr.name);
     if (!func) {
       throw new Exception("No such function " + expr.name);
     }
-    const args = expr.args.map(item => evalExpr(item, env));
-    return func.apply(env, args);
+
+    // TODO: hardcoded <= 2 args. Change to .reduce...
+    const args = expr.args;
+    if (!args.length) {
+      return thunk(cont, func.apply(null));
+    }
+    if (args.length === 1) {
+      return thunk(
+        evalExpr, args[0], env, val => thunk(
+          cont, func.apply(null, [val])
+        )
+      );
+    }
+    return thunk(
+      evalExpr, args[0], env, leftVal => thunk(
+        evalExpr, args[1], env, rightVal => thunk(
+          cont, func.apply(null, [leftVal, rightVal])
+        )
+      )
+    );
 
   case "ident":
-    return lookup(env, expr.name);
+    return thunk(cont, lookup(env, expr.name));
 
   default:
-    console.log("expr not found", expr);
-    //const func = lookup(env, expr.name);
+    throw new Error("Unknown form: " + expr.tag);
 
   }
 };
 
 
-const evalStatement = (stmt, env) => {
-  var val;
+const evalStatement = (stmt, env, cb) => {
+  //var val;
 
   // Special forms
   switch(stmt.tag) {
 
   case "expr":
-    return evalExpr(stmt.body, env);
-
+    return evalAll(stmt.body, env, v => {
+      cb(v);
+    });
+    /*
   case "loop":
     // Todo: change to single-step model. Shouldn't execute entire loop at once.
     if (!exists(env, stmt.ident)) {
@@ -113,7 +184,7 @@ const evalStatement = (stmt, env) => {
       val = evalStatements(stmt.body2, env);
     }
     return val;
-
+*/
 
   case "define":
     const func = function() {
@@ -126,31 +197,29 @@ const evalStatement = (stmt, env) => {
     };
 
     add_binding(env, stmt.name, func);
+    cb && cb(0);
     return 0;
 
   case "comment":
     // TODO: remove from input?
     return null;
-
   default:
     console.log("syntax error? unknown statement:", stmt.tag);
   }
 };
 
 const evalStatements = (stmts, env) => {
-  return stmts.reduce((val, s) => evalStatement(s, env), 0);
-};
-
-const evalProg = (lines, env) => {
-  return lines.reduce((val, ss) => {
-    return evalStatements(ss, env);
-  }, 0);
+  if (stmts.length) {
+    evalStatement(stmts[0], env, () => evalStatements(stmts.slice(1), env));
+  }
 };
 
 module.exports = {
   evalExpr,
-  evalProg,
   evalStatement,
   evalStatements,
-  lookup
+  lookup,
+
+  evalAll,
+  stepOne
 };

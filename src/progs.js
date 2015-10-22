@@ -1,5 +1,14 @@
 module.exports = {
-  hello: `# Welcome to Sprak, yo!
+  hello: `ClearText()
+Bar()
+Print("this thing")
+Print("rules. " + (5 * (2 + 1)))
+Bar()
+void Bar()
+  Print("==============")
+end
+`,
+  hello2: `# Welcome to Sprak, yo!
 var a = 1.5
 var b = Random()
 var c = 2

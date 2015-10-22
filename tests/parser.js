@@ -6,13 +6,6 @@ const deep = tester.deep;
 console.log("🌴  🌴  🌴  Parser 🌴  🌴  🌴");
 console.log("");
 
-// Testing
-const a = `void Add(a, b)
-  a + b
-end`;
-
-console.log(parse(a));
-
 deep(
   "Comment. # Hello, World.",
   parse(`# Hello, World`),
